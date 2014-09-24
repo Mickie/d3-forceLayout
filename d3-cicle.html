@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+      <script src="js/jquery.js"></script>
+      <script src="js/d3.min.js"></script>
+  </head>
+  <body>
+<script>
+    var w=500;
+    var h=300;
+    var r=5;
+    var data=generateData(100);
+    var fill=d3.scale.category10();
+
+    function generateData(length){
+        var returnArray=[];
+        for(var i=0;i<length;i++){
+            var obj={};
+            obj.x=Math.random()*w+1;
+            obj.y=Math.random()*h+1;
+            returnArray.push(obj);
+        }
+        return returnArray;
+    }
+
+    var svg=d3.select('body').append('svg').attr('width',w).attr('height',h);//create svg
+    var nodes=svg.selectAll('circle').data(data).enter().append('circle');//create circle
+    var force=d3.layout.force().nodes(data).size([w,h]).on('tick',tick).start();//render
+
+    d3.select('body').on('mousedown',mousedown);
+
+    function tick(){
+        nodes.attr('cx',function(d){return d.x})
+                .attr('cy',function(d){return d.y})
+                .attr('r',r)
+                .style('fill',function(d,i){ return fill(i&3);})
+                .style('stroke',function(d,i){ return d3.rgb(fill(i&3)).darker(2)})
+                .call(force.drag)
+                .on('mousedown',function(){
+                    d3.event.stopPropagation();
+                });
+
+    }
+
+    function mousedown(){
+        data.forEach(function(o,i){
+            o.x += (Math.random() - .5) * 40;
+            o.y += (Math.random() - .5) * 40;
+        })
+        force.resume();
+    }
+
+</script>
+  </body>
+</html>
